@@ -32,7 +32,7 @@ export default async function CardWrapper() {
 
 export function Card({
   title,
-  value,
+  value = 0,
   type,
 }: {
   title: string;
