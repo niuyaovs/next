@@ -1,0 +1,10 @@
+.login-wrapper {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  margin: 180px;
+  .system-name {
+    font-size: 30px;
+    margin-bottom: 20px;
+  }
+}
