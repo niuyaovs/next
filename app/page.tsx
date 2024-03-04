@@ -1,65 +1,93 @@
-'use client'
-import './index.scss'
-import { Button, Checkbox, Form, Input } from 'antd';
-import { UserOutlined } from '@ant-design/icons';
+'use client';
+import React from 'react';
+import {
+  LaptopOutlined,
+  NotificationOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
+import type { MenuProps } from 'antd';
+import { Breadcrumb, Layout, Menu, theme } from 'antd';
+import cookie from 'react-cookies'
 
-export default function Page() {
-  const onFinish = (values: any) => {
-    console.log('Success:', values);
+const { Header, Content, Sider } = Layout;
+const menuList = [
+  {
+    icon: UserOutlined,
+    label: '招聘信息',
+  },
+  {
+    icon: UserOutlined,
+    label: '面试管理',
+  },
+  {
+    icon: UserOutlined,
+    label: '订阅管理',
+  },
+  {
+    icon: UserOutlined,
+    label: '就业数据分析',
+  },
+];
+const items2: MenuProps['items'] = menuList.map(({ icon, label }, index) => {
+  const key = String(index + 1);
+  return {
+    key: `sub${key}`,
+    icon: React.createElement(icon),
+    label: label,
+
+    // children: new Array(4).fill(null).map((_, j) => {
+    //   const subKey = index * 4 + j + 1;
+    //   return {
+    //     key: subKey,
+    //     label: `option${subKey}`,
+    //   };
+    // }),
   };
-  
-  const onFinishFailed = (errorInfo: any) => {
-    console.log('Failed:', errorInfo);
-  };
-  
-  type FieldType = {
-    username?: string;
-    password?: string;
-    remember?: string;
-  };
+});
+
+const App: React.FC = () => {
+  const {
+    token: { colorBgContainer, borderRadiusLG },
+  } = theme.useToken();
+  // cookie.load('userInfo')
   return (
-    <div className="login-wrapper">
-      <p className='system-name'>高校人才交流招聘系统</p>
-      <Form
-        name="basic"
-        labelCol={{ span: 8 }}
-        wrapperCol={{ span: 16 }}
-        style={{ maxWidth: 600 }}
-        initialValues={{ remember: true }}
-        onFinish={onFinish}
-        onFinishFailed={onFinishFailed}
-        autoComplete="off"
-      >
-        <Form.Item<FieldType>
-          label="Username"
-          name="username"
-          rules={[{ required: true, message: 'Please input your username!' }]}
-        >
-          <Input size="large" placeholder="请输入账号" prefix={<UserOutlined />}/>
-        </Form.Item>
-
-        <Form.Item<FieldType>
-          label="Password"
-          name="password"
-          rules={[{ required: true, message: 'Please input your password!' }]}
-        >
-          <Input.Password size="large" placeholder='请输入密码'/>
-        </Form.Item>
-
-        <Form.Item<FieldType>
-          name="remember"
-          valuePropName="checked"
-          wrapperCol={{ offset: 8, span: 16 }}
-        >
-          <Checkbox>Remember me</Checkbox>
-        </Form.Item>
-
-        <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-          <Button type="primary" htmlType="submit">
-            Submit
-          </Button>
-        </Form.Item>
-      </Form>
-    </div>
+    <Layout>
+      <Header style={{ display: 'flex', alignItems: 'center' }}>
+        <div>
+          <UserOutlined />
+        </div>
+      </Header>
+      <Layout>
+        <Sider width={200} style={{ background: colorBgContainer }}>
+          <Menu
+            mode="inline"
+            defaultSelectedKeys={['1']}
+            defaultOpenKeys={['sub1']}
+            style={{ height: '100%', borderRight: 0 }}
+            items={items2}
+          />
+        </Sider>
+        <Layout style={{ padding: '0 24px 24px' }}>
+          <Breadcrumb style={{ margin: '16px 0' }}>
+            <Breadcrumb.Item>Home</Breadcrumb.Item>
+            <Breadcrumb.Item>List</Breadcrumb.Item>
+            <Breadcrumb.Item>App</Breadcrumb.Item>
+          </Breadcrumb>
+          <Content
+            style={{
+              padding: 24,
+              margin: 0,
+              minHeight: 280,
+              background: colorBgContainer,
+              borderRadius: borderRadiusLG,
+            }}
+          >
+            Content
+          </Content>
+        </Layout>
+      </Layout>
+    </Layout>
   );
-}
+};
+
+export default App;
