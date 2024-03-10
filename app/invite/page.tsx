@@ -1,9 +1,20 @@
 'use client';
+import './index.scss';
 import Layout from '@/app/layout/index';
 import { SearchOutlined, SettingOutlined } from '@ant-design/icons';
-import { Button, Cascader, Input, List, Select, Space } from 'antd';
+import {
+  Button,
+  Cascader,
+  ConfigProvider,
+  Input,
+  List,
+  Select,
+  Space,
+} from 'antd';
 import { CITYLIST } from '@/app/config/city';
 import { useEffect, useState } from 'react';
+import { fetchInviteList } from '@/app/lib/invite';
+import { useRouter } from 'next/navigation';
 
 const { Option } = Select;
 
@@ -12,23 +23,19 @@ interface City {
   city: string;
 }
 
-const data = [
-  {
-    title: 'Ant Design Title 1',
-  },
-  {
-    title: 'Ant Design Title 2',
-  },
-  {
-    title: 'Ant Design Title 3',
-  },
-  {
-    title: 'Ant Design Title 4',
-  },
-];
 export default function Invite() {
   const [pCode, setPCode] = useState('');
   const [cityList, setCityList] = useState([] as Array<City>);
+  const [inviteList, setInviteList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  useEffect(() => {
+    fetchInviteList().then((res) => {
+      setInviteList(res);
+      setLoading(false);
+    });
+  }, []);
+  // 城市筛选器
   useEffect(() => {
     const cityList: Array<City> =
       (CITYLIST.find((item) => item.province_geocode == pCode)
@@ -55,29 +62,72 @@ export default function Invite() {
       )}
     </Space>
   );
+  const handleGoDetail = (id) => {
+    // console.log(id)
+    // router.push({path: '/invite/detail', query: {inviteId: id}})
+    router.push(`/invite/detail?inviteId=${id}`);
+  };
   return (
-    <Layout>
-      <div style={{ width: '80%' }}>
-        <Input
-          addonBefore={selectBefore}
-          addonAfter={<SearchOutlined />}
-          defaultValue="mysite"
-        />
-        <List
-          pagination={{ position: 'bottom', align: 'center' }}
-          dataSource={data}
-          renderItem={(item, index) => (
-            <List.Item>
-              <List.Item.Meta
-                // avatar={<Avatar src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${index}`} />}
-                title={<a href="https://ant.design">{item.title}</a>}
-                description="Ant Design, a design language for background applications, is refined by Ant UED Team"
-              />
-            </List.Item>
-          )}
-        />
-      </div>
-    </Layout>
+    <ConfigProvider
+      theme={{
+        token: {
+          // Seed Token，影响范围大
+          colorPrimary: '#00bebd',
+
+          // 派生变量，影响范围小
+          // colorBgContainer: '#e3f2f4',
+        },
+      }}
+    >
+      <Layout>
+        <div className="invite-wrapper">
+          <Space.Compact style={{ width: '80%', marginTop: '30px' }}>
+            <Input
+              style={{ width: '80%', marginBottom: '20px' }}
+              addonBefore={selectBefore}
+              size="large"
+            />
+            <Button size="large" type="primary">
+              搜索
+            </Button>
+          </Space.Compact>
+          {/* <Input
+            addonAfter={<Button type="primary">搜索</Button>}
+            defaultValue="mysite"
+            
+          /> */}
+          <List
+            style={{ width: '90%' }}
+            pagination={{ position: 'bottom', align: 'center' }}
+            dataSource={inviteList}
+            loading={loading}
+            renderItem={(item, index) => (
+              <List.Item style={{ backgroundColor: '#fff', padding: '10px' }}>
+                {/* 招聘 岗位 base 薪资 学历 地区 公司 职位招聘描述 评论 hr */}
+                {/* 公司 描述 官网 */}
+                {/* 评论 评论人 评论 回答 时间 */}
+                <List.Item.Meta
+                  // avatar={<Avatar src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${index}`} />}
+                  title={`${item.post_name}[${item.district}]`}
+                  description={`${item.prize}  最低要求：${item.education}`}
+                />
+                <List.Item.Meta
+                  // avatar={<Avatar src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${index}`} />}
+                  title={item.company_name}
+                  description="1000-9999人"
+                />
+                <Button
+                  type="link"
+                  onClick={() => handleGoDetail(item.company_id)}
+                >
+                  详情
+                </Button>
+              </List.Item>
+            )}
+          />
+        </div>
+      </Layout>
+    </ConfigProvider>
   );
 }
 

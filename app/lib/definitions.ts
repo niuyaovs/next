@@ -86,7 +86,3 @@ export type InvoiceForm = {
   amount: number;
   status: 'pending' | 'paid';
 };
-export type UserInfo = {
-  telephone: string,
-  password: string
-}

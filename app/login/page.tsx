@@ -9,6 +9,7 @@ import { setCookie } from '@/app/util/cookie';
 interface User {
   name?: string;
   telephone?: string;
+  id?: string 
 }
 
 export default function Login() {
@@ -23,10 +24,11 @@ export default function Login() {
       .then(async (values) => {
         try {
           const res = await fetchUserInfo();
-          console.log(res);
-          const userMap: User = {};
+          const userMap: User = {
+            id: account
+          };
           const accountList = res.map((userItem) => {
-            userMap[userItem.telephone] = userItem.name;
+            userMap[userItem.telephone] = userItem.user_name;
             return userItem.telephone;
           });
           if (accountList.includes(account)) {
@@ -35,8 +37,11 @@ export default function Login() {
             });
             if (passwordList.includes(password)) {
               message.success('登录成功～');
-              setCookie('userInfo', userMap[account]);
-              // cookie.set('userInfo', userMap[account])
+              const resMap = {
+                id: account,
+                username: userMap[account]
+              }
+              setCookie('userInfo', JSON.stringify(resMap));
               router.push('/');
             } else {
               message.info('账号或密码错误，请再次核对～');
@@ -46,6 +51,7 @@ export default function Login() {
           }
         } catch (err) {
           console.log(err);
+          message.error('登录失败，请联系管理员');
         }
       })
       .catch((info) => {
@@ -74,7 +80,7 @@ export default function Login() {
             label="Account"
             name="account"
             key="account"
-            // initialValue={'13512630772'}
+            initialValue={'13512630772'}
             rules={[{ required: true, message: 'Please input your account!' }]}
           >
             <Input
@@ -88,7 +94,7 @@ export default function Login() {
             label="Password"
             name="password"
             key="password"
-            // initialValue={'123456'}
+            initialValue={'123456'}
             rules={[{ required: true, message: 'Please input your password!' }]}
           >
             <Input.Password
