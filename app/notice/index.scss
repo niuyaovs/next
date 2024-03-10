@@ -1,0 +1,26 @@
+.notice-wrapper {
+  padding: 20px 40px;
+  .notice-title {
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    .line {
+      width: 5px;
+      height: 18px;
+      background-color: #00bebd;
+    }
+  }
+  .notice-list {
+    background-color: #fff;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    padding: 12px 20px;
+    .list-title {
+      font-size: 16px;
+      font-weight: 500;
+    }
+  }
+}

@@ -13,7 +13,7 @@ import {
 } from 'antd';
 import { CITYLIST } from '@/app/config/city';
 import { useEffect, useState } from 'react';
-import { fetchInviteList } from '@/app/lib/invite';
+import { fetchInviteList,fetchInviteConditionList } from '@/app/lib/invite';
 import { useRouter } from 'next/navigation';
 
 const { Option } = Select;
@@ -28,6 +28,8 @@ export default function Invite() {
   const [cityList, setCityList] = useState([] as Array<City>);
   const [inviteList, setInviteList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [city, setCity] = useState('');
+  const [input, setInput] = useState('');
   const router = useRouter();
   useEffect(() => {
     fetchInviteList().then((res) => {
@@ -47,26 +49,34 @@ export default function Invite() {
       <Select
         defaultValue="全国"
         style={{ width: '120px' }}
-        onChange={(e) => setPCode(e)}
+        onChange={(e) => {
+          setPCode(e);
+          setCity('')
+        }}
       >
         {CITYLIST.map((item) => {
           return <Option key={item.province_geocode}>{item.province}</Option>;
         })}
       </Select>
       {cityList.length !== 0 && (
-        <Select style={{ width: '120px' }}>
+        <Select style={{ width: '120px' }} onChange={(e) => setCity(e)}>
           {cityList.map((item) => {
-            return <Option key={item.city_geocode}>{item.city}</Option>;
+            return <Option key={item.city}>{item.city}</Option>;
           })}
         </Select>
       )}
     </Space>
   );
-  const handleGoDetail = (id) => {
+  const handleGoDetail = (id: any) => {
     // console.log(id)
     // router.push({path: '/invite/detail', query: {inviteId: id}})
     router.push(`/invite/detail?inviteId=${id}`);
   };
+  const handleSearch = () => {
+    fetchInviteConditionList(city, input).then(res => {
+      setInviteList(res)
+    })
+  }
   return (
     <ConfigProvider
       theme={{
@@ -86,8 +96,9 @@ export default function Invite() {
               style={{ width: '80%', marginBottom: '20px' }}
               addonBefore={selectBefore}
               size="large"
+              onChange={e => setInput(e.target.value)}
             />
-            <Button size="large" type="primary">
+            <Button size="large" type="primary" onClick={handleSearch}>
               搜索
             </Button>
           </Space.Compact>

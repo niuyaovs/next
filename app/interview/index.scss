@@ -1,0 +1,16 @@
+.interview-wrapper {
+  padding: 20px 40px;
+  .interview-title {
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    .line {
+      width: 5px;
+      height: 18px;
+      background-color: #00bebd;
+    }
+  }
+}

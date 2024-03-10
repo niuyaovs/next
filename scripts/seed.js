@@ -1,5 +1,5 @@
 const { db } = require('@vercel/postgres');
-const { users, invite, comment } = require('../app/lib/placeholder-data.js');
+const { users, invite, comment, interview } = require('../app/lib/placeholder-data.js');
 const bcrypt = require('bcrypt');
 
 async function seedUsers(client) {
@@ -53,7 +53,6 @@ async function seedInvite(client) {
         post_duty VARCHAR(255) NOT NULL,
         post_require VARCHAR(255) NOT NULL,
         more VARCHAR(255) NOT NULL,
-        comment_id_list VARCHAR(255) NOT NULL,
         district VARCHAR(255) NOT NULL,
         discription VARCHAR(255) NOT NULL,
         user_id TEXT NOT NULL,
@@ -69,8 +68,8 @@ async function seedInvite(client) {
       invite.map(async (user) => {
         // const hashedPassword = await bcrypt.hash(user.password, 10);
         return client.sql`
-        INSERT INTO invite (company_id, company_name, post_name, post_abstract,post_duty,post_require,more,district, discription, user_id, comment_id, education, prize,comment_id_list)
-        VALUES (${user.company_id}, ${user.company_name}, ${user.post_name},  ${user.post_abstract}, ${user.post_duty}, ${user.post_require}, ${user.more}, ${user.district}, ${user.discription},  ${user.user_id}, ${user.comment_id}, ${user.education},  ${user.prize},  ${user.comment_id_list})
+        INSERT INTO invite (company_id, company_name, post_name, post_abstract,post_duty,post_require,more,district, discription, user_id, comment_id, education, prize)
+        VALUES (${user.company_id}, ${user.company_name}, ${user.post_name},  ${user.post_abstract}, ${user.post_duty}, ${user.post_require}, ${user.more}, ${user.district}, ${user.discription},  ${user.user_id}, ${user.comment_id}, ${user.education},  ${user.prize})
         ON CONFLICT (company_id) DO NOTHING;
       `;
       }),
@@ -99,7 +98,7 @@ async function seedComment(client) {
         company_id TEXT NOT NULL,
         user_id TEXT NOT NULL,
         user_name TEXT NOT NULL,
-        answer_id_list VARCHAR(255) NOT NULL
+        parent_id TEXT
       );
     `;
 
@@ -109,8 +108,8 @@ async function seedComment(client) {
       comment.map(async (user) => {
         // const hashedPassword = await bcrypt.hash(user.password, 10);
         return client.sql`
-        INSERT INTO comment (comment_id, comment, comment_time, company_id, user_id, user_name, answer_id_list)
-        VALUES (${user.comment_id}, ${user.comment}, ${user.comment_time}, ${user.company_id}, ${user.user_id},  ${user.user_name},  ${user.answer_id_list})
+        INSERT INTO comment (comment_id, comment, comment_time, company_id, user_id, user_name, parent_id)
+        VALUES (${user.comment_id}, ${user.comment}, ${user.comment_time}, ${user.company_id}, ${user.user_id},  ${user.user_name}, ${users.parent_id})
         ON CONFLICT (comment_id) DO NOTHING;
       `;
       }),
@@ -128,12 +127,53 @@ async function seedComment(client) {
   }
 }
 
+async function seedInterview(client) {
+  try {
+    await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+    const createTable = await client.sql`
+      CREATE TABLE IF NOT EXISTS interview (
+        interview_id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+        interview_time VARCHAR(255) NOT NULL,
+        interview_location VARCHAR(255) NOT NULL UNIQUE,
+        interview_person_id TEXT NOT NULL,
+        hr_id TEXT NOT NULL,
+        company_id TEXT NOT NULL,
+        company_name TEXT NOT NULL
+      );
+    `;
+
+    console.log(`Created "interview" table`);
+
+    const insertedInterview = await Promise.all(
+      interview.map(async (user) => {
+        // const hashedPassword = await bcrypt.hash(user.password, 10);
+        return client.sql`
+        INSERT INTO interview (interview_id, interview_time, interview_location, interview_person_id, hr_id, company_id, company_name)
+        VALUES (${user.interview_id}, ${user.interview_time}, ${user.interview_location}, ${user.interview_person_id}, ${user.hr_id},  ${user.company_id}, ${user.company_name})
+        ON CONFLICT (interview_id) DO NOTHING;
+      `;
+      }),
+    );
+
+    console.log(`Seeded ${insertedInterview.length} interview`);
+
+    return {
+      createTable,
+      comment: insertedInterview,
+    };
+  } catch (error) {
+    console.error('Error seeding interview:', error);
+    throw error;
+  }
+}
+
 async function main() {
   const client = await db.connect();
 
-  await seedUsers(client);
-  await seedInvite(client);
+  // await seedUsers(client);
+  // await seedInvite(client);
   // await seedComment(client)
+  await seedInterview(client);
 
   await client.end();
 }

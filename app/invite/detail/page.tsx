@@ -9,9 +9,27 @@ import {
   PlusOutlined,
   UsergroupDeleteOutlined,
 } from '@ant-design/icons';
-import { Button, ConfigProvider } from 'antd';
+import { Button, ConfigProvider, Space } from 'antd';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { fetchInviteDetail } from '@/app/lib/invite';
+import { useEffect, useState } from 'react';
 
 export default function Invite() {
+  const params = useSearchParams();
+  const [detail, setDetail] = useState({});
+  const [dutyList, setDutyList] = useState([]);
+  const [requireList, setRequireList] = useState([]);
+  const [moreList, setMoreList] = useState([]);
+  useEffect(() => {
+    const id = params.get('inviteId');
+    fetchInviteDetail(id).then(async (res) => {
+      console.log(res);
+      await setDetail(res);
+      await setDutyList(res.post_duty.split(';'));
+      await setRequireList(res.post_require.split(';'));
+      await setMoreList(res.more.split(';'));
+    });
+  }, []);
   return (
     <ConfigProvider
       theme={{
@@ -27,17 +45,17 @@ export default function Invite() {
       <Layout>
         <div className="abstract-container">
           <div className="title-text">
-            <span style={{ marginRight: '30px' }}>{'前端开发工程师'}</span>
-            <span style={{ color: '#f26d49' }}>{'19k'}</span>
+            <span style={{ marginRight: '30px' }}>{detail.post_name}</span>
+            <span style={{ color: '#f26d49' }}>{detail.prize}</span>
           </div>
           <div className="icon-container">
             <div className="icon-box">
               <AimOutlined className="icon-item" />
-              <span className="text">{'北京'}</span>
+              <span className="text">{detail.district}</span>
             </div>
             <div className="icon-box">
               <UsergroupDeleteOutlined className="icon-item" />
-              <span className="text">{'本科'}</span>
+              <span className="text">{detail.education}</span>
             </div>
           </div>
           <Button
@@ -56,36 +74,32 @@ export default function Invite() {
         <div className="discription-container">
           <div className="title-box">职位描述</div>
           <div>
-            <div>{'一、岗位名称: 安卓开发工程师（统招本科，学信网可查）'}</div>
-            <div>二、岗位概述：</div>
-            <div>
-              作为一名安卓开发工程师，您将负责开发和维护安卓手机应用客户端程序，确保其高效、稳定地运行。您需要与团队合作，进行项目管理和系统设计，同时与合作伙伴沟通并进行定制化移植。
-            </div>
-            <div>三、岗位职责：</div>
-            <div>
-              基于Android平台，负责Android手机应用客户端程序的开发和维护；
-            </div>
-            <div>协助主管进行项目管理和系统设计；</div>
-            <div>负责与合作伙伴沟通，并进行定制化移植（针对Android平台）；</div>
-            <div>对Android应用进行性能优化和问题调试。 </div>
-            <div>四、任职要求：</div>
-            <div>本科及以上学历，计算机相关专业优先；</div>
-            <div>
-              2年以上Android开发经验，深入理解Java语言，扎实的编码基础；
-            </div>
-            <div>熟练使用Git、Android</div>
-            <div>Studio及性能调优工具，能够发现和优化App性能问题；</div>
-            <div>精通Java多线程开发、Android</div>
-            <div>UI开发、动画开发，有良好的代码习惯和面向对象编程思想；</div>
-            <div>积极主动，有良好的团队合作精神和强烈的责任心。 </div>
-            <div>五、加分项：</div>
-            <div>有丰富的Android应用性能优化经验； </div>
-            <div>熟悉Android系统的底层机制；</div>
-            <div>有良好的英语沟通能力。</div>
+            <Space direction='vertical'>
+              <div>一、岗位名称：</div>
+              <div>{detail.post_name}</div>
+              <div>二、岗位概述：</div>
+              <div>{detail.post_abstract}</div>
+              <div>三、岗位职责：</div>
+              {dutyList.map((item) => {
+                return <div key={item}>{item}</div>;
+              })}
+              <div>四、任职要求：</div>
+              {requireList.map((item) => {
+                return <div key={item}>{item}</div>;
+              })}
+              <div>五、加分项：</div>
+              {moreList.map((item) => {
+                return <div key={item}>{item}</div>;
+              })}
+            </Space>
           </div>
         </div>
         <div className="discription-container">
           <div className="title-box">公司介绍</div>
+          <Space direction='vertical' className='discription-box'>
+            {detail.discription}
+            <p>公司官网：</p>
+          </Space>
         </div>
         <div className="discription-container">
           <div className="title-box">评论区</div>
